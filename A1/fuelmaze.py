@@ -12,8 +12,9 @@ Starter code for 384-A1, Last modified: September 30th, 2014
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 '''
 
-from problem import *
+from problem import * #@UnusedWildImport
 from math import *
+import time
 
 class FuelmazeState:
 
@@ -78,13 +79,16 @@ class Fuelmaze(Problem):
                 States.append(("Left", 1, FuelmazeState((state.pos[0] - 1, state.pos[1]), state.fuel - 1)))
                 
             if((state.pos[1] < self.height - 1) and (not (state.pos[0], state.pos[1] + 1) in self.obstacles)):
-                States.append(("Up", 1, FuelmazeState((state.pos[0], state.pos[1] + 1), state.fuel - 1)))
+                States.append(("Down", 1, FuelmazeState((state.pos[0], state.pos[1] + 1), state.fuel - 1)))
                 
             if((state.pos[1] > 0) and (not (state.pos[0], state.pos[1] - 1) in self.obstacles)):
-                States.append(("Down", 1, FuelmazeState((state.pos[0], state.pos[1] - 1), state.fuel - 1)))
+                States.append(("Up", 1, FuelmazeState((state.pos[0], state.pos[1] - 1), state.fuel - 1)))
                 
-        elif(state.pos in self.fuelstations):
+        if(state.pos in self.fuelstations):
             States.append(("Refuel", 1, FuelmazeState(state.pos, self.capacity)))
+        
+        #time.sleep(1)
+        #print(States)
         
         return States
 
@@ -102,6 +106,7 @@ class Fuelmaze(Problem):
 
         # We do not specify a target fuel in our goal states, alter this test so that
         # it only checks position, not fuel
+        #print(self.hashable_state(state))
         return (state.pos == self.goal.pos)
         
 
@@ -113,12 +118,13 @@ def fuelmaze_h_uniform(problem, state):
 
 # # Implement the Manhattan Distance
 def fuelmaze_h_manhattan(problem, state):
+    #print(problem.hashable_state(state))
     return (sqrt(sum((a - b) ** 2 for a, b in zip(state.pos, problem.goal.pos))))
     
 
 # # Implement your own heuristic
 def fuelmaze_h_custom(problem, state):
-    return 0
+    return (problem.capacity - state.fuel)
 
 
 
@@ -132,7 +138,7 @@ def fuelmaze_h_custom(problem, state):
 -------------------------------------------------------------------------'''
 if __name__ == "__main__":
 
-    from search import *
+    from search import * #@UnusedWildImport
 
     # # TEST CASES
     # # A LIST OF FUELMAZES TO BE TESTED:

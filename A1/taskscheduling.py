@@ -19,12 +19,18 @@ class SchedulingState:
 
 
     #Implement this, you will have to alter the parameters
-    def __init__(self):
+    def __init__(self, configuration, cost, toDo):
         '''Initializes the state'''
+        self.cost = cost
+        self.toDo = toDo
+        #print(toDo)
+        self.configuration = configuration
+        self.configurationChanged = False
         
     #To be implemented - for information purposes only
     def __repr__(self):
         '''Returns a string representation of the state'''
+        ret = "(Time, Config, Configurable, To-Do) = ({},{},{},{})".format(self.cost, self.configuration, self.configurationChanged, str(self.toDo))
         return ret
 
 
@@ -52,7 +58,9 @@ class TaskScheduling(Problem):
         '''
         
         #Update this line to coincide with your constructor for SchedulingState
-        #Problem.__init__(self, SchedulingState(...), SchedulingState(...))
+        Problem.__init__(self, SchedulingState(starting_configuration,0,jobs), SchedulingState(starting_configuration,0,[]))
+        self.configurations = configurations
+        #print(jobs)
 
         
     #Implement this!
@@ -73,6 +81,21 @@ class TaskScheduling(Problem):
         
         #Generate the states here
         
+        #print(self.configurations)
+        if(not state.configurationChanged):
+            for c in self.configurations:
+                #print(c)
+                if(not (state.configuration == c[0])):
+                    #print("Appending: ", c)
+                    States.append(("Set configuration("+c[0]+")",c[1], SchedulingState(c[0],state.cost+c[1],list(state.toDo))))
+        #print(state.toDo)
+        for j in state.toDo:
+            if(state.cost >= j[2]):
+                temp = list(state.toDo)
+                temp.remove(j)
+                States.append(("Perform Task(" +j[0]+")", j[3], SchedulingState(state.configuration, state.cost + j[3], temp)))                
+        #print("************************")
+        #print(States)
         return States
 
 
@@ -80,18 +103,16 @@ class TaskScheduling(Problem):
     def hashable_state(self, state):
         '''Return a tuple of the state's values that represents the state 
            such that equivalent states result in equivalent tuples.'''
-        return 
+        #print(state.toDo)
+        return ((state.configuration,state.configurationChanged,state.cost,str(state.toDo)))
 
     #Implement this!
     def goal_check(self, state):
-  
+        #If we had a single goal state we could use the following test:
+        #return self.hashable_state(self.goal) == self.hashable_state(state)
         
-
-      #If we had a single goal state we could use the following test:
-      #return self.hashable_state(self.goal) == self.hashable_state(state)
-
-      #Any state in which we have finished all jobs should be a goal state
-      return False
+        #Any state in which we have finished all jobs should be a goal state
+        return (state.toDo == [])
         
 
 # The given NULL heuristic (do not change)
